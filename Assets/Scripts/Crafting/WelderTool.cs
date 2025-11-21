@@ -1,12 +1,13 @@
-using System.Net;
 using DG.Tweening;
 using UnityEngine;
 
 public class WelderTool : MonoBehaviour
 {
+    [Header("Movement Settings")]
     public float moveSmoothness = 15f;
     public float planeHeight = 0.5f;
 
+    [Header("Tool References")]
     public Transform normalPoint;
     public Transform weldingPoint;
     public Transform toolMesh;
@@ -15,20 +16,32 @@ public class WelderTool : MonoBehaviour
     [Header("Welding")]
     public Transform weldNosel;
     public float weldDetectionRadius;
-    public LayerMask edgeMask;
-    public ParticleSystem sparkVfx;
+    public LayerMask patchMask;
+    public AudioSource weldingSound;
 
     private Camera cam;
     private bool isDragging;
+
+    public static bool toolEnabled;
 
     private void Start()
     {
         cam = Camera.main;
         OnStopWeld();
+
+        // Configure audio
+        weldingSound.playOnAwake = false;
+        weldingSound.loop = true;
     }
 
     private void Update()
     {
+        if (!toolEnabled)
+        {
+            OnStopWeld();
+            return;
+        }
+
         if (Input.GetMouseButtonDown(0))
         {
             isDragging = true;
@@ -38,17 +51,17 @@ public class WelderTool : MonoBehaviour
         if (Input.GetMouseButtonUp(0))
         {
             isDragging = false;
-
             OnStopWeld();
         }
 
         if (isDragging)
         {
             MoveToolWithMouse();
-            WeldCheck();
+            DetectPatch();
         }
     }
 
+    // Move tool back to resting position
     private void OnStopWeld()
     {
         toolMesh.DOKill(false);
@@ -56,8 +69,10 @@ public class WelderTool : MonoBehaviour
         toolMesh.DOLocalMove(Vector3.zero, 0.2f);
         toolMesh.DOLocalRotate(Vector3.zero, 0.2f);
         weldVfx.SetActive(false);
+        weldingSound.Stop();
     }
 
+    // Move tool to welding position
     private void OnStartWeld()
     {
         toolMesh.DOKill(false);
@@ -67,10 +82,10 @@ public class WelderTool : MonoBehaviour
         weldVfx.SetActive(true);
     }
 
+    // Smoothly move tool with mouse on a horizontal plane
     private void MoveToolWithMouse()
     {
         Ray ray = cam.ScreenPointToRay(Input.mousePosition);
-
         Plane movementPlane = new Plane(Vector3.up, new Vector3(0, planeHeight, 0));
 
         if (movementPlane.Raycast(ray, out float enter))
@@ -82,33 +97,30 @@ public class WelderTool : MonoBehaviour
         }
     }
 
-    private void WeldCheck()
+    // Detect weldable patches and trigger welding
+    private void DetectPatch()
     {
-        Collider[] cols = Physics.OverlapSphere(weldNosel.position, weldDetectionRadius, edgeMask);
+        Collider[] cols = Physics.OverlapSphere(weldNosel.position, weldDetectionRadius, patchMask);
+
+        // Stop sound if no patches detected
+        if (cols.Length == 0 && weldingSound.isPlaying)
+        {
+            weldingSound.Stop();
+        }
 
         foreach (var col in cols)
         {
-            if (!col.TryGetComponent<WeldPointGroup>(out var group))
+            if (!col.TryGetComponent<WelderPatch>(out var patch))
                 continue;
 
-            foreach (var wp in group.weldPoints)
-            {
-                if (wp.welded) continue;
+            patch.TryWeld(weldNosel.position);
 
-                Vector3 worldPos = group.transform.TransformPoint(wp.localPos);
-                float dist = Vector3.Distance(weldNosel.position, worldPos);
-
-                if (dist <= weldDetectionRadius)
-                {
-                    wp.welded = true;
-                    Instantiate(sparkVfx, worldPos, Quaternion.Euler(-90, 0, 0));
-                }
-            }
-
-            WeldingManager.Instance.CheckCompletion(group);
+            if (!weldingSound.isPlaying)
+                weldingSound.Play();
         }
     }
 
+    // Draw gizmo for weld detection radius
     private void OnDrawGizmos()
     {
         if (weldNosel == null) return;
@@ -116,5 +128,4 @@ public class WelderTool : MonoBehaviour
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(weldNosel.position, weldDetectionRadius);
     }
-
 }

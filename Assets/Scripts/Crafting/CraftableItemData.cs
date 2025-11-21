@@ -7,10 +7,9 @@ public class CraftableItemData : ScriptableObject
 
     public string itemName;
 
-    public CraftableItem craftableItemPrefab;
+    public CraftableItem craftableItemPrefab;   // Prefab used when crafting
+    public RepairableItem repairableItemPrefab; // Prefab used after repairing
 
-    public RepairableItem repairableItemPrefab;
-
-    public Sprite craftableItemIcon;
-    public Sprite repairedItemIcon;
+    public Sprite craftableItemIcon; // Icon for crafting UI
+    public Sprite repairedItemIcon;  // Icon after repair
 }

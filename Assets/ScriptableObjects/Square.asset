@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f052b784780f4ee8b34a3d5b84aa950, type: 3}
+  m_Name: Square
+  m_EditorClassIdentifier: 
+  itemType: 0
+  itemName: Square
+  craftableItemPrefab: {fileID: 6151717687235660837, guid: 1312714ccca58447b9af8061f1c6c39a, type: 3}
+  repairableItemPrefab: {fileID: 4596406412995050260, guid: 0fd1a1a6b18d04589903959c505586bc, type: 3}
+  craftableItemIcon: {fileID: -258034101, guid: e83a95fc72c1c4d98bd26a64a62029fb, type: 3}
+  repairedItemIcon: {fileID: 1918026859, guid: e83a95fc72c1c4d98bd26a64a62029fb, type: 3}

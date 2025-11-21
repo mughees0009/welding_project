@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f052b784780f4ee8b34a3d5b84aa950, type: 3}
+  m_Name: Triangle
+  m_EditorClassIdentifier: 
+  itemType: 1
+  itemName: Triangle
+  craftableItemPrefab: {fileID: 6500158055016104049, guid: 3bb86feb4349b46d19f891b015ab61c0, type: 3}
+  repairableItemPrefab: {fileID: 1524926393618145099, guid: ac31e5e5e9ab54eefabbde5a0b88bdcb, type: 3}
+  craftableItemIcon: {fileID: -1216696530, guid: e83a95fc72c1c4d98bd26a64a62029fb, type: 3}
+  repairedItemIcon: {fileID: 2050884816, guid: e83a95fc72c1c4d98bd26a64a62029fb, type: 3}

@@ -1,4 +1,7 @@
+using System;
+using Cinemachine;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class WeldingManager : MonoBehaviour
 {
@@ -8,63 +11,63 @@ public class WeldingManager : MonoBehaviour
         get
         {
             if (instance == null)
-            {
                 instance = FindAnyObjectByType<WeldingManager>();
-            }
             return instance;
         }
     }
 
-    public Transform repairableItemPoint;
+    [Header("Progress Settings")]
     public float requiredProgress = 1f;
 
+    public ProgressBar progressBar;
+    public Button addToStorageBtn;
+    public CinemachineVirtualCamera craftingCamera;
 
-    private RepairableItem currentItem;
-    private float weldProgress;
+    private RepairableItem currRepairableItem;
 
-
-    public void SetRepairableItem(CraftableItemData data)
+    private void Awake()
     {
-        foreach (Transform child in repairableItemPoint)
-            Destroy(child.gameObject);
-
-        var repairableItem = Instantiate(data.repairableItemPrefab, repairableItemPoint);
-
-        currentItem = repairableItem;
-        currentItem.data = data;
-        weldProgress = 0;
+        addToStorageBtn.onClick.AddListener(AddtoStorage);
+        addToStorageBtn.gameObject.SetActive(false);
+        progressBar.gameObject.SetActive(false);
+        craftingCamera.gameObject.SetActive(false);
     }
 
-    public void AddWeldProgress(float amount)
+    // Assign the current repairable item and enable welding UI
+    public void SetRepairableItem(RepairableItem repairableItem)
     {
-        if (currentItem == null) return;
-
-        weldProgress += amount;
-
-        if (weldProgress >= requiredProgress)
-            CompleteRepair();
+        currRepairableItem = repairableItem;
+        progressBar.BarValue = 0;
+        progressBar.gameObject.SetActive(true);
+        craftingCamera.gameObject.SetActive(true);
+        WelderTool.toolEnabled = true;
     }
-    public void CheckCompletion(WeldPointGroup group)
-    {
-        float p = group.GetProgress01();
 
-        if (p >= 1f)
+    // Update welding progress
+    public void OnChangeProgress(float weldProgress)
+    {
+        if (currRepairableItem == null) return;
+
+        if (weldProgress >= 1)
         {
-            Debug.Log("Plate fully welded!");
-
-
+            currRepairableItem.isRepaired = true;
+            addToStorageBtn.gameObject.SetActive(true);
         }
+
+        progressBar.BarValue = Mathf.Round(weldProgress * 100);
     }
-    private void CompleteRepair()
+
+    // Add repaired item to storage and reset UI
+    private void AddtoStorage()
     {
-        InventoryItemInfo repairedItem = new()
-        {
-            itemName = currentItem.requiredCraftableItemType + " Plate",
-            icon = currentItem.data.repairedItemIcon,
-        };
+        addToStorageBtn.gameObject.SetActive(false);
 
-        SecondaryStorage.Instance.AddItem(repairedItem);
+        SecondaryStorage.Instance.AddItem(currRepairableItem.data.itemType);
 
-        Destroy(currentItem.gameObject);
+        Destroy(currRepairableItem.gameObject);
+
+        progressBar.gameObject.SetActive(false);
+        craftingCamera.gameObject.SetActive(false);
+        WelderTool.toolEnabled = false;
     }
 }
